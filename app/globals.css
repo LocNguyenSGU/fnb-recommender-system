@@ -1,0 +1,243 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================================
+   LEAFLET STYLES
+   ================================ */
+
+/* Import Leaflet CSS - này sẽ được handle bởi MapView component */
+
+/* ================================
+   CUSTOM MARKER ANIMATIONS
+   ================================ */
+
+@keyframes markerPop {
+  0% {
+    transform: scale(0) translateY(-20px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) translateY(0);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.custom-marker {
+  animation: markerPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  background: none !important;
+  border: none !important;
+}
+
+/* User location marker animation */
+.user-location-marker {
+  background: none !important;
+  border: none !important;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* ================================
+   LEAFLET POPUP STYLING
+   ================================ */
+
+.leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+  padding: 0 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+}
+
+.leaflet-popup-tip {
+  display: none !important;
+  /* Hide default tip, we have custom tail in marker */
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: #666 !important;
+  font-size: 24px !important;
+  padding: 8px !important;
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 50% !important;
+  transition: all 0.2s !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  background-color: #f3f4f6 !important;
+  color: #111 !important;
+}
+
+/* ================================
+   GLOBAL TRANSITIONS
+   ================================ */
+
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* ================================
+   MOBILE RESPONSIVE
+   ================================ */
+
+@media (max-width: 640px) {
+  .leaflet-popup {
+    width: 90vw !important;
+  }
+
+  /* Make category filter more compact on mobile */
+  .absolute.top-4.left-4 {
+    max-width: 160px;
+  }
+
+  /* Adjust stats badge size on mobile */
+  .absolute.top-4.right-4 {
+    padding: 0.5rem !important;
+  }
+
+  .absolute.top-4.right-4 p:first-child {
+    font-size: 0.625rem !important;
+  }
+
+  .absolute.top-4.right-4 p:last-child {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* ================================
+   SCROLLBAR STYLING
+   ================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* ================================
+   UTILITY CLASSES
+   ================================ */
+
+.bg-gradient-animated {
+  background: linear-gradient(
+    135deg,
+    #667eea 0%,
+    #764ba2 100%
+  );
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Map container full height */
+.leaflet-container {
+  height: 100vh;
+  width: 100%;
+  z-index: 0;
+}
+
+/* Ensure proper stacking context */
+.z-\[1000\] {
+  z-index: 1000;
+}
+
+/* ================================
+   LOADING SPINNER ENHANCEMENTS
+   ================================ */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-ping {
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* ================================
+   BUTTON HOVER EFFECTS
+   ================================ */
+
+button {
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* ================================
+   ACCESSIBILITY
+   ================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
