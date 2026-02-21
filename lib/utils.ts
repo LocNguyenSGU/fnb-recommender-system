@@ -29,25 +29,25 @@ export function isShopOpen(openTime: string, closeTime: string): boolean {
 }
 
 // Get category color by ID
-export function getCategoryColor(categoryId: number): string {
+export function getCategoryColor(categoryId?: number): string {
   const colors: Record<number, string> = {
     1: '#FF6B6B',
     2: '#4ECDC4',
     3: '#FFE66D',
     4: '#95E1D3',
   };
-  return colors[categoryId] || '#999999';
+  return colors[categoryId || 0] || '#999999';
 }
 
 // Get category icon by ID
-export function getCategoryIcon(categoryId: number): string {
+export function getCategoryIcon(categoryId?: number): string {
   const icons: Record<number, string> = {
     1: '🥖',
     2: '🍚',
     3: '🍺',
     4: '☕',
   };
-  return icons[categoryId] || '📍';
+  return icons[categoryId || 0] || '📍';
 }
 
 // Get category name by ID
