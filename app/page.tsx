@@ -1,19 +1,16 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import dynamic from 'next/dynamic';
 import { MOCK_SHOPS } from '@/lib/mockData';
 import { generateNearbyShops } from '@/lib/utils';
 import CategoryFilter from '@/components/ui/CategoryFilter';
 import LocationButton from '@/components/ui/LocationButton';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-
-// Dynamic import for Leaflet (avoid SSR issues)
-const MapView = dynamic(() => import('@/components/Map/MapView'), {
-  ssr: false,
-  loading: () => <LoadingSpinner />,
-});
-
+import Nav from '@/components/dashboard/nav';
+import Pannel from '@/components/dashboard/pannel';
+import Map from '@/components/dashboard/map';
+import Blog from '@/components/dashboard/blog';
+import Footer from '@/components/dashboard/footer';
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
   const [mapRef, setMapRef] = useState<any>(null);
@@ -24,6 +21,7 @@ export default function HomePage() {
 
   // Get user's current location
   useEffect(() => {
+    
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -80,31 +78,34 @@ export default function HomePage() {
 
   return (
     <main className="relative">
-      {/* Map */}
-      <MapView
-        shops={allShops}
-        selectedCategory={selectedCategory}
-        onMapReady={setMapRef}
-        userLocation={userLocation}
-      />
-
-      {/* Floating UI */}
-      <CategoryFilter
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-      />
-
-      <LocationButton onClick={handleRecenter} />
-
-      {/* Stats Badge (Top right) */}
-      <div className="absolute top-4 right-4 z-[1000] bg-white rounded-xl shadow-lg px-4 py-3">
-        <p className="text-xs text-gray-600 uppercase tracking-wide">
-          Địa điểm
-        </p>
-        <p className="text-3xl font-bold text-blue-600">
-          {filteredShops.length}
-        </p>
+      <div>
+        <Nav />
+        <Pannel />
       </div>
+      
+      <div className="relative">
+        <Map 
+          shops={allShops}
+          selectedCategory={selectedCategory}
+          onMapReady={setMapRef}
+          userLocation={userLocation}
+          onCategorySelect={setSelectedCategory}
+        />
+        
+        <LocationButton onClick={handleRecenter} />
+
+        {/* Stats Badge (Top right) */}
+        <div className="absolute top-4 right-4 z-[1000] bg-white rounded-xl shadow-lg px-4 py-3">
+          <p className="text-xs text-gray-600 uppercase tracking-wide">
+            Địa điểm
+          </p>
+          <p className="text-3xl font-bold text-blue-600">
+            {filteredShops.length}
+          </p>
+        </div>
+      </div>
+      <Blog />
+      <Footer />
     </main>
   );
 }
