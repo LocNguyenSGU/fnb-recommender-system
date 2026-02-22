@@ -5,7 +5,7 @@ import AdminLayout from '@/components/Admin/AdminLayout';
 import DataTable from '@/components/Admin/DataTable';
 import ModalForm from '@/components/Admin/ModalForm';
 import { ToastContainer, useToast } from '@/components/Admin/Toast';
-import { userAPI } from '@/lib/api';
+import users from '@/lib/users';
 import { User } from '@/lib/types';
 
 const fields = [
@@ -54,6 +54,7 @@ const columns = [
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const { toasts, addToast, removeToast } = useToast();
@@ -62,8 +63,16 @@ export default function UsersPage() {
     loadUsers();
   }, []);
 
-  const loadUsers = () => {
-    setUsers(userAPI.getAll());
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await users.getAll();
+      setUsers(response.data);
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to load users', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAdd = () => {
@@ -76,25 +85,29 @@ export default function UsersPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    userAPI.delete(id);
-    loadUsers();
-    addToast('User deleted successfully', 'success');
+  const handleDelete = async (id: number) => {
+    try {
+      await users.remove(id);
+      addToast('User deleted successfully', 'success');
+      loadUsers();
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to delete user', 'error');
+    }
   };
 
-  const handleSubmit = (data: Record<string, any>) => {
+  const handleSubmit = async (data: Record<string, any>) => {
     try {
       if (editingUser) {
-        userAPI.update(editingUser.id, data as any);
+        await users.update(editingUser.id, data);
         addToast('User updated successfully', 'success');
       } else {
-        userAPI.create(data as any);
+        await users.create(data);
         addToast('User created successfully', 'success');
       }
       loadUsers();
       setIsModalOpen(false);
-    } catch (error) {
-      addToast('An error occurred', 'error');
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'An error occurred', 'error');
     }
   };
 
@@ -119,6 +132,7 @@ export default function UsersPage() {
           columns={columns}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          loading={loading}
         />
 
         <ModalForm
