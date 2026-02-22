@@ -1,11 +1,29 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { userAPI, shopAPI, reviewAPI, blogAPI } from '@/lib/api';
+import usersApi from '@/lib/users';
+import shopsApi from '@/lib/shops';
+import reviewsApi from '@/lib/reviews';
+import blogsApi from '@/lib/blogs';
+import categoriesApi from '@/lib/categories';
+import commentsApi from '@/lib/comments';
+import menusApi from '@/lib/menus';
+import menuItemsApi from '@/lib/menuItems';
 import LineChart from '@/components/Admin/LineChart';
 import BarChart from '@/components/Admin/BarChart';
 import AdminSidebar from '@/components/Admin/AdminSidebar';
+
+/** API từ lib/*.js (crudFactory) có getAll; TypeScript có thể không thấy do .js */
+type ApiGetAll = { getAll: () => Promise<{ data?: unknown }> };
+
+/** Chuẩn hóa response từ apiClient (getAll): có thể là mảng hoặc { content: [] } */
+function toList(res: { data?: unknown }): unknown[] {
+  const d = res?.data;
+  if (Array.isArray(d)) return d;
+  if (d && typeof d === 'object' && 'content' in d && Array.isArray((d as { content: unknown }).content))
+    return (d as { content: unknown[] }).content;
+  return [];
+}
 
 // Stats Card Component
 const StatsCard = ({ title, value, change, icon }: { title: string; value: string; change?: string; icon: string }) => (
@@ -40,54 +58,135 @@ export default function AdminDashboard() {
     shops: 0,
     reviews: 0,
     blogs: 0,
+    categories: 0,
+    comments: 0,
+    menus: 0,
+    menuItems: 0,
   });
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState<string | null>(null);
 
-  const [userGrowthData] = useState([
-    { name: 'Jan', value: 45 },
-    { name: 'Feb', value: 52 },
-    { name: 'Mar', value: 48 },
-    { name: 'Apr', value: 61 },
-    { name: 'May', value: 55 },
-    { name: 'Jun', value: 67 },
-  ]);
+  const [userGrowthData, setUserGrowthData] = useState<{ name: string; value: number }[]>([]);
 
   const [shopsByCategoryData, setShopsByCategoryData] = useState<{ name: string; value: number; color?: string }[]>([]);
 
   useEffect(() => {
-    // Load stats from API
-    const loadStats = () => {
-      setStats({
-        users: userAPI.getAll().length,
-        shops: shopAPI.getAll().length,
-        reviews: reviewAPI.getAll().length,
-        blogs: blogAPI.getAll().length,
-      });
+    // Gọi API thật (lib/users.js, lib/shops.js, ...) qua apiClient/crudFactory, tự thống kê từ getAll()
+    const loadStats = async () => {
+      setStatsLoading(true);
+      setStatsError(null);
+      try {
+        const [usersRes, shopsRes, reviewsRes, blogsRes, categoriesRes, commentsRes, menusRes, menuItemsRes] =
+          await Promise.all([
+            (usersApi as ApiGetAll).getAll(),
+            (shopsApi as ApiGetAll).getAll(),
+            (reviewsApi as ApiGetAll).getAll(),
+            (blogsApi as ApiGetAll).getAll(),
+            (categoriesApi as ApiGetAll).getAll(),
+            (commentsApi as unknown as ApiGetAll).getAll(),
+            (menusApi as ApiGetAll).getAll(),
+            (menuItemsApi as ApiGetAll).getAll(),
+          ]);
+
+        const users = toList(usersRes);
+        const shops = toList(shopsRes);
+        const reviews = toList(reviewsRes);
+        const blogs = toList(blogsRes);
+        const categories = toList(categoriesRes);
+        const comments = toList(commentsRes);
+        const menus = toList(menusRes);
+        const menuItems = toList(menuItemsRes);
+
+        setStats({
+          users: users.length,
+          shops: shops.length,
+          reviews: reviews.length,
+          blogs: blogs.length,
+          categories: categories.length,
+          comments: comments.length,
+          menus: menus.length,
+          menuItems: menuItems.length,
+        });
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+        setStatsError('Không tải được thống kê. Kiểm tra kết nối backend.');
+        setStats({
+          users: 0,
+          shops: 0,
+          reviews: 0,
+          blogs: 0,
+          categories: 0,
+          comments: 0,
+          menus: 0,
+          menuItems: 0,
+        });
+      } finally {
+        setStatsLoading(false);
+      }
     };
 
-    // Calculate shops by category
-    const loadShopsByCategory = () => {
-      const shops = shopAPI.getAll();
-      const categories = [
-        { id: 1, name: 'Quán ăn sáng', color: '#FF6B6B' },
-        { id: 2, name: 'Quán cơm', color: '#4ECDC4' },
-        { id: 3, name: 'Quán nhậu', color: '#FFE66D' },
-        { id: 4, name: 'Quán cafe', color: '#95E1D3' },
-      ];
+    // Thống kê shops theo category từ API shops + categories
+    const loadShopsByCategory = async () => {
+      try {
+        const [shopsRes, categoriesRes] = await Promise.all([
+          (shopsApi as unknown as ApiGetAll).getAll(),
+          (categoriesApi as unknown as ApiGetAll).getAll(),
+        ]);
+        const shops = toList(shopsRes) as { categoryId?: number; category_id?: number }[];
+        const categoriesList = toList(categoriesRes) as { id: number; name: string }[];
+        const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#A78BFA', '#F472B6'];
 
-      const categoryCounts = categories.map(category => {
-        const count = shops.filter(shop => shop.categoryId === category.id).length;
-        return {
-          name: category.name,
-          value: count,
-          color: category.color,
-        };
-      });
+        const categoryCounts =
+          categoriesList.length > 0
+            ? categoriesList.map((cat, i) => ({
+                name: cat.name,
+                value: shops.filter((s) => (s.categoryId ?? s.category_id) === cat.id).length,
+                color: colors[i % colors.length],
+              }))
+            : [
+                { name: 'Quán ăn sáng', value: shops.filter((s) => (s.categoryId ?? s.category_id) === 1).length, color: '#FF6B6B' },
+                { name: 'Quán cơm', value: shops.filter((s) => (s.categoryId ?? s.category_id) === 2).length, color: '#4ECDC4' },
+                { name: 'Quán nhậu', value: shops.filter((s) => (s.categoryId ?? s.category_id) === 3).length, color: '#FFE66D' },
+                { name: 'Quán cafe', value: shops.filter((s) => (s.categoryId ?? s.category_id) === 4).length, color: '#95E1D3' },
+              ];
 
-      setShopsByCategoryData(categoryCounts);
+        setShopsByCategoryData(categoryCounts);
+      } catch (error) {
+        console.error('Failed to load shops by category:', error);
+        setShopsByCategoryData([]);
+      }
+    };
+
+    // Thống kê user growth theo tháng từ API users
+    const loadUserGrowth = async () => {
+      try {
+        const usersRes = await (usersApi as unknown as ApiGetAll).getAll();
+        const users = toList(usersRes) as { createdAt?: string }[];
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const countsByMonth: Record<string, number> = {};
+        monthNames.forEach((_, i) => (countsByMonth[String(i + 1)] = 0));
+
+        users.forEach((u) => {
+          const createdAt = u.createdAt ? new Date(u.createdAt) : new Date();
+          const monthKey = String(createdAt.getMonth() + 1);
+          if (monthKey in countsByMonth) countsByMonth[monthKey]++;
+        });
+
+        setUserGrowthData(
+          monthNames.map((name, i) => ({
+            name,
+            value: countsByMonth[String(i + 1)] ?? 0,
+          }))
+        );
+      } catch (error) {
+        console.error('Failed to load user growth:', error);
+        setUserGrowthData([]);
+      }
     };
 
     loadStats();
     loadShopsByCategory();
+    loadUserGrowth();
   }, []);
 
   return (
@@ -106,32 +205,27 @@ export default function AdminDashboard() {
           {/* Main Content Area */}
           <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
             <div className="max-w-6xl">
-              {/* Stats Cards */}
+              {/* Stats Cards - data from backend API */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <StatsCard
-                title="Total Users"
-                value={stats.users.toString()}
-                change="+12% from last month"
-                icon="👥"
-              />
-              <StatsCard
-                title="Total Shops"
-                value={stats.shops.toString()}
-                change="+8% from last month"
-                icon="🏪"
-              />
-              <StatsCard
-                title="Total Reviews"
-                value={stats.reviews.toString()}
-                change="+15% from last month"
-                icon="⭐"
-              />
-              <StatsCard
-                title="Total Blogs"
-                value={stats.blogs.toString()}
-                change="+5% from last month"
-                icon="📝"
-              />
+              {statsError && (
+                <div className="col-span-full p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                  {statsError}
+                </div>
+              )}
+              {statsLoading ? (
+                <div className="col-span-full py-8 text-center text-gray-500">Đang tải thống kê...</div>
+              ) : (
+                <>
+                  <StatsCard title="Tổng Users" value={stats.users.toString()} icon="👥" />
+                  <StatsCard title="Tổng Shops" value={stats.shops.toString()} icon="🏪" />
+                  <StatsCard title="Tổng Reviews" value={stats.reviews.toString()} icon="⭐" />
+                  <StatsCard title="Tổng Blogs" value={stats.blogs.toString()} icon="📝" />
+                  <StatsCard title="Tổng Categories" value={stats.categories.toString()} icon="📁" />
+                  <StatsCard title="Tổng Comments" value={stats.comments.toString()} icon="💬" />
+                  <StatsCard title="Tổng Menus" value={stats.menus.toString()} icon="📋" />
+                  <StatsCard title="Tổng Menu Items" value={stats.menuItems.toString()} icon="🍽️" />
+                </>
+              )}
             </div>
 
             {/* Charts Section - Bar chart first, then Line chart */}
@@ -170,6 +264,6 @@ export default function AdminDashboard() {
         </div>
       </div>
     </div>
-  </div>
+    </div>
   );
 }
