@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { userAPI, shopAPI, reviewAPI, blogAPI } from '@/lib/api';
 import LineChart from '@/components/Admin/LineChart';
 import BarChart from '@/components/Admin/BarChart';
+import AdminSidebar from '@/components/Admin/AdminSidebar';
 
 // Stats Card Component
 const StatsCard = ({ title, value, change, icon }: { title: string; value: string; change?: string; icon: string }) => (
@@ -91,35 +92,22 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Main Container with Sidebar */}
       <div className="flex">
-        {/* Sidebar - Data Management */}
-        <div className="w-64 bg-white border-r border-gray-200 p-6 min-h-screen">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">Data Management</h2>
-          <nav className="space-y-2">
-            {models.map((model) => (
-              <Link
-                key={model.path}
-                href={`/admin/${model.path}`}
-                className="block px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 border border-transparent hover:border-blue-200"
-              >
-                <h3 className="font-semibold text-sm">{model.name}</h3>
-                <p className="text-xs text-gray-500 mt-1">{model.description}</p>
-              </Link>
-            ))}
-          </nav>
-        </div>
+        {/* Sidebar */}
+        <AdminSidebar />
 
-        {/* Main Content Area */}
-        <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
-          <div className="max-w-6xl">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="mt-2 text-gray-600">Manage your F&B recommender system data</p>
-            </div>
+        {/* Main content */}
+        <div className="flex-1 p-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-600 mt-2">Welcome to the F&B Recommender System Admin Panel</p>
+          </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Main Content Area */}
+          <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-6xl">
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <StatsCard
                 title="Total Users"
                 value={stats.users.toString()}
@@ -182,5 +170,6 @@ export default function AdminDashboard() {
         </div>
       </div>
     </div>
+  </div>
   );
 }
