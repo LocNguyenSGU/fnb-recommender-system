@@ -5,12 +5,12 @@ import AdminLayout from '@/components/Admin/AdminLayout';
 import DataTable from '@/components/Admin/DataTable';
 import ModalForm from '@/components/Admin/ModalForm';
 import { ToastContainer, useToast } from '@/components/Admin/Toast';
-import { commentAPI } from '@/lib/api';
+import commentsApi from '@/lib/comments';
 import { BlogComment } from '@/lib/types';
 
 const fields = [
-  { key: 'blog_id', label: 'Blog ID', type: 'number' as const, required: true },
-  { key: 'user_id', label: 'User ID', type: 'number' as const, required: true },
+  { key: 'blogId', label: 'Blog ID', type: 'number' as const, required: true },
+  { key: 'userId', label: 'User ID', type: 'number' as const, required: true },
   { key: 'content', label: 'Content', type: 'textarea' as const, required: true },
   { key: 'replies', label: 'Replies (JSON array)', type: 'textarea' as const },
 ];
@@ -18,10 +18,10 @@ const fields = [
 const columns = [
   { key: 'id' as keyof BlogComment, label: 'ID' },
   { key: 'content' as keyof BlogComment, label: 'Content', render: (value: string) => value.length > 50 ? `${value.substring(0, 50)}...` : value },
-  { key: 'blog_id' as keyof BlogComment, label: 'Blog ID' },
-  { key: 'user_id' as keyof BlogComment, label: 'User ID' },
+  { key: 'blogId' as keyof BlogComment, label: 'Blog ID' },
+  { key: 'userId' as keyof BlogComment, label: 'User ID' },
   {
-    key: 'created_at' as keyof BlogComment,
+    key: 'createdAt' as keyof BlogComment,
     label: 'Created',
     render: (value: string) => new Date(value).toLocaleDateString(),
   },
@@ -29,6 +29,7 @@ const columns = [
 
 export default function CommentsPage() {
   const [comments, setComments] = useState<BlogComment[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingComment, setEditingComment] = useState<BlogComment | null>(null);
   const { toasts, addToast, removeToast } = useToast();
@@ -37,8 +38,16 @@ export default function CommentsPage() {
     loadComments();
   }, []);
 
-  const loadComments = () => {
-    setComments(commentAPI.getAll());
+  const loadComments = async () => {
+    try {
+      setLoading(true);
+      const data = await (commentsApi as any).getAll();
+      setComments(data);
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to load comments', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAdd = () => {
@@ -51,13 +60,17 @@ export default function CommentsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    commentAPI.delete(id);
-    loadComments();
-    addToast('Comment deleted successfully', 'success');
+  const handleDelete = async (id: number) => {
+    try {
+      await (commentsApi as any).remove(id);
+      loadComments();
+      addToast('Comment deleted successfully', 'success');
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to delete comment', 'error');
+    }
   };
 
-  const handleSubmit = (data: Record<string, any>) => {
+  const handleSubmit = async (data: Record<string, any>) => {
     try {
       if (data.replies && typeof data.replies === 'string') {
         try {
@@ -68,16 +81,16 @@ export default function CommentsPage() {
       }
 
       if (editingComment) {
-        commentAPI.update(editingComment.id, data as any);
+        await (commentsApi as any).update(editingComment.id, data);
         addToast('Comment updated successfully', 'success');
       } else {
-        commentAPI.create(data as any);
+        await (commentsApi as any).create(data);
         addToast('Comment created successfully', 'success');
       }
       loadComments();
       setIsModalOpen(false);
-    } catch (error) {
-      addToast('An error occurred', 'error');
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'An error occurred', 'error');
     }
   };
 
@@ -102,6 +115,7 @@ export default function CommentsPage() {
           columns={columns}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          loading={loading}
         />
 
         <ModalForm
