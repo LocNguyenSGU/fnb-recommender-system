@@ -46,7 +46,7 @@ const columns = [
   { key: 'email' as keyof User, label: 'Email' },
   { key: 'role' as keyof User, label: 'Role' },
   {
-    key: 'created_at' as keyof User,
+    key: 'createdAt' as keyof User,
     label: 'Created',
     render: (value: string) => new Date(value).toLocaleDateString(),
   },

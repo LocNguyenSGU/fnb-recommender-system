@@ -12,8 +12,8 @@ export interface User {
   facebook_id?: string;
   provider: 'local' | 'google' | 'facebook';
   role: 'user' | 'admin' | 'owner';
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Category {
@@ -22,8 +22,8 @@ export interface Category {
   description?: string;
   icon?: string;
   color?: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Shop {
@@ -41,8 +41,8 @@ export interface Shop {
   images: string[];
   rating?: number;
   review_count?: number;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Menu {
@@ -50,8 +50,8 @@ export interface Menu {
   shop_id: number;
   name: string;
   images: string[];
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface MenuItem {
@@ -65,8 +65,8 @@ export interface MenuItem {
   is_hot: boolean;
   is_signature: boolean;
   view_count: number;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Review {
@@ -76,8 +76,8 @@ export interface Review {
   rating: number;
   content: string;
   replies: any[];
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Blog {
@@ -88,8 +88,8 @@ export interface Blog {
   images: string[];
   likes_count: number;
   status: 'pending' | 'published' | 'draft';
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface BlogComment {
@@ -98,6 +98,6 @@ export interface BlogComment {
   user_id: number;
   content: string;
   replies: any[];
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }

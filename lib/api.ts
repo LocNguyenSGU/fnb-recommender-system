@@ -32,12 +32,12 @@ function getById<T extends { id: number }>(data: T[], id: number): T | undefined
   return data.find(item => item.id === id);
 }
 
-function create<T extends { id: number; created_at: string; updated_at: string }>(data: T[], item: Omit<T, 'id' | 'created_at' | 'updated_at'>): T {
+function create<T extends { id: number; createdAt: string; updatedAt: string }>(data: T[], item: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): T {
   const newItem = {
     ...item,
     id: Math.max(0, ...data.map(d => d.id)) + 1,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   } as T;
   data.push(newItem);
   return newItem;
@@ -64,7 +64,7 @@ function remove<T extends { id: number }>(data: T[], id: number): boolean {
 export const userAPI = {
   getAll: () => getAll(mockUsers),
   getById: (id: number) => getById(mockUsers, id),
-  create: (user: Omit<User, 'id' | 'created_at' | 'updated_at'>) => create(mockUsers, user),
+  create: (user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>) => create(mockUsers, user),
   update: (id: number, updates: Partial<User>) => update(mockUsers, id, updates),
   delete: (id: number) => remove(mockUsers, id),
 };
@@ -73,7 +73,7 @@ export const userAPI = {
 export const categoryAPI = {
   getAll: () => getAll(mockCategories),
   getById: (id: number) => getById(mockCategories, id),
-  create: (category: Omit<Category, 'id' | 'created_at' | 'updated_at'>) => create(mockCategories, category),
+  create: (category: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>) => create(mockCategories, category),
   update: (id: number, updates: Partial<Category>) => update(mockCategories, id, updates),
   delete: (id: number) => remove(mockCategories, id),
 };
@@ -82,7 +82,7 @@ export const categoryAPI = {
 export const shopAPI = {
   getAll: () => getAll(mockShops),
   getById: (id: number) => getById(mockShops, id),
-  create: (shop: Omit<Shop, 'id' | 'created_at' | 'updated_at'>) => create(mockShops, shop),
+  create: (shop: Omit<Shop, 'id' | 'createdAt' | 'updatedAt'>) => create(mockShops, shop),
   update: (id: number, updates: Partial<Shop>) => update(mockShops, id, updates),
   delete: (id: number) => remove(mockShops, id),
 };
@@ -91,7 +91,7 @@ export const shopAPI = {
 export const menuAPI = {
   getAll: () => getAll(mockMenus),
   getById: (id: number) => getById(mockMenus, id),
-  create: (menu: Omit<Menu, 'id' | 'created_at' | 'updated_at'>) => create(mockMenus, menu),
+  create: (menu: Omit<Menu, 'id' | 'createdAt' | 'updatedAt'>) => create(mockMenus, menu),
   update: (id: number, updates: Partial<Menu>) => update(mockMenus, id, updates),
   delete: (id: number) => remove(mockMenus, id),
 };
@@ -100,7 +100,7 @@ export const menuAPI = {
 export const menuItemAPI = {
   getAll: () => getAll(mockMenuItems),
   getById: (id: number) => getById(mockMenuItems, id),
-  create: (item: Omit<MenuItem, 'id' | 'created_at' | 'updated_at'>) => create(mockMenuItems, item),
+  create: (item: Omit<MenuItem, 'id' | 'createdAt' | 'updatedAt'>) => create(mockMenuItems, item),
   update: (id: number, updates: Partial<MenuItem>) => update(mockMenuItems, id, updates),
   delete: (id: number) => remove(mockMenuItems, id),
 };
@@ -109,7 +109,7 @@ export const menuItemAPI = {
 export const reviewAPI = {
   getAll: () => getAll(mockReviews),
   getById: (id: number) => getById(mockReviews, id),
-  create: (review: Omit<Review, 'id' | 'created_at' | 'updated_at'>) => create(mockReviews, review),
+  create: (review: Omit<Review, 'id' | 'createdAt' | 'updatedAt'>) => create(mockReviews, review),
   update: (id: number, updates: Partial<Review>) => update(mockReviews, id, updates),
   delete: (id: number) => remove(mockReviews, id),
 };
@@ -118,7 +118,7 @@ export const reviewAPI = {
 export const blogAPI = {
   getAll: () => getAll(mockBlogs),
   getById: (id: number) => getById(mockBlogs, id),
-  create: (blog: Omit<Blog, 'id' | 'created_at' | 'updated_at'>) => create(mockBlogs, blog),
+  create: (blog: Omit<Blog, 'id' | 'createdAt' | 'updatedAt'>) => create(mockBlogs, blog),
   update: (id: number, updates: Partial<Blog>) => update(mockBlogs, id, updates),
   delete: (id: number) => remove(mockBlogs, id),
 };
@@ -127,7 +127,7 @@ export const blogAPI = {
 export const commentAPI = {
   getAll: () => getAll(mockComments),
   getById: (id: number) => getById(mockComments, id),
-  create: (comment: Omit<BlogComment, 'id' | 'created_at' | 'updated_at'>) => create(mockComments, comment),
+  create: (comment: Omit<BlogComment, 'id' | 'createdAt' | 'updatedAt'>) => create(mockComments, comment),
   update: (id: number, updates: Partial<BlogComment>) => update(mockComments, id, updates),
   delete: (id: number) => remove(mockComments, id),
 };
