@@ -47,7 +47,7 @@ export default function Footer() {
   }, []);
 
   return (
-    <section className="w-full bg-gradient-to-r from-blue-600 to-blue-800 py-20 px-6">
+    <section className="w-full bg-gradient-to-r from-blue-600 to-blue-800 py-20 px-6 rounded-t-3xl shadow-inner">
       <div className="max-w-4xl mx-auto text-center">
         {/* Heading */}
         <h2
