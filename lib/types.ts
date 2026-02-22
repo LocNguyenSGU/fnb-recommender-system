@@ -47,7 +47,7 @@ export interface Shop {
 
 export interface Menu {
   id: number;
-  shop_id: number;
+  shopId: number;
   name: string;
   images: string[];
   createdAt: string;
@@ -56,15 +56,15 @@ export interface Menu {
 
 export interface MenuItem {
   id: number;
-  menu_id: number;
+  menuId: number;
   name: string;
   description?: string;
   price: number;
   images: string[];
-  is_available: boolean;
-  is_hot: boolean;
-  is_signature: boolean;
-  view_count: number;
+  isAvailable: boolean;
+  isHot: boolean;
+  isSignature: boolean;
+  viewCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -82,11 +82,11 @@ export interface Review {
 
 export interface Blog {
   id: number;
-  author_id: number;
+  authorId: number;
   title: string;
   content: string;
   images: string[];
-  likes_count: number;
+  likesCount: number;
   status: 'pending' | 'published' | 'draft';
   createdAt: string;
   updatedAt: string;
@@ -94,8 +94,8 @@ export interface Blog {
 
 export interface BlogComment {
   id: number;
-  blog_id: number;
-  user_id: number;
+  blogId: number;
+  userId: number;
   content: string;
   replies: any[];
   createdAt: string;

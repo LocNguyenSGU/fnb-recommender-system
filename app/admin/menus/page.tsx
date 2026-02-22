@@ -5,11 +5,11 @@ import AdminLayout from '@/components/Admin/AdminLayout';
 import DataTable from '@/components/Admin/DataTable';
 import ModalForm from '@/components/Admin/ModalForm';
 import { ToastContainer, useToast } from '@/components/Admin/Toast';
-import { menuAPI } from '@/lib/api';
+import menusApi from '@/lib/menus';
 import { Menu } from '@/lib/types';
 
 const fields = [
-  { key: 'shop_id', label: 'Shop ID', type: 'number' as const, required: true },
+  { key: 'shopId', label: 'Shop ID', type: 'number' as const, required: true },
   { key: 'name', label: 'Name', type: 'text' as const },
   { key: 'images', label: 'Images (JSON array)', type: 'textarea' as const },
 ];
@@ -17,14 +17,14 @@ const fields = [
 const columns = [
   { key: 'id' as keyof Menu, label: 'ID' },
   { key: 'name' as keyof Menu, label: 'Name' },
-  { key: 'shop_id' as keyof Menu, label: 'Shop ID' },
+  { key: 'shopId' as keyof Menu, label: 'Shop ID' },
   {
     key: 'images' as keyof Menu,
     label: 'Images',
     render: (value: string[]) => `${value.length} images`,
   },
   {
-    key: 'created_at' as keyof Menu,
+    key: 'createdAt' as keyof Menu,
     label: 'Created',
     render: (value: string) => new Date(value).toLocaleDateString(),
   },
@@ -32,6 +32,7 @@ const columns = [
 
 export default function MenusPage() {
   const [menus, setMenus] = useState<Menu[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState<Menu | null>(null);
   const { toasts, addToast, removeToast } = useToast();
@@ -40,8 +41,16 @@ export default function MenusPage() {
     loadMenus();
   }, []);
 
-  const loadMenus = () => {
-    setMenus(menuAPI.getAll());
+  const loadMenus = async () => {
+    try {
+      setLoading(true);
+      const data = await (menusApi as any).getAll();
+      setMenus(data);
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to load menus', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAdd = () => {
@@ -54,13 +63,17 @@ export default function MenusPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    menuAPI.delete(id);
-    loadMenus();
-    addToast('Menu deleted successfully', 'success');
+  const handleDelete = async (id: number) => {
+    try {
+      await (menusApi as any).remove(id);
+      loadMenus();
+      addToast('Menu deleted successfully', 'success');
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to delete menu', 'error');
+    }
   };
 
-  const handleSubmit = (data: Record<string, any>) => {
+  const handleSubmit = async (data: Record<string, any>) => {
     try {
       if (data.images && typeof data.images === 'string') {
         try {
@@ -71,16 +84,16 @@ export default function MenusPage() {
       }
 
       if (editingMenu) {
-        menuAPI.update(editingMenu.id, data as any);
+        await (menusApi as any).update(editingMenu.id, data);
         addToast('Menu updated successfully', 'success');
       } else {
-        menuAPI.create(data as any);
+        await (menusApi as any).create(data);
         addToast('Menu created successfully', 'success');
       }
       loadMenus();
       setIsModalOpen(false);
-    } catch (error) {
-      addToast('An error occurred', 'error');
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'An error occurred', 'error');
     }
   };
 
@@ -105,6 +118,7 @@ export default function MenusPage() {
           columns={columns}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          loading={loading}
         />
 
         <ModalForm
