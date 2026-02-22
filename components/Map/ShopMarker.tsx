@@ -32,8 +32,8 @@ const createCustomIcon = (color: string, emoji: string) => {
 };
 
 export default function ShopMarker({ shop, animationDelay = 0 }: ShopMarkerProps) {
-  const color = getCategoryColor(shop.category_id);
-  const icon = getCategoryIcon(shop.category_id);
+  const color = getCategoryColor(shop.categoryId);
+  const icon = getCategoryIcon(shop.categoryId);
 
   return (
     <Marker

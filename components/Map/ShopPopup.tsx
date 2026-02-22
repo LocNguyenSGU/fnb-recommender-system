@@ -10,7 +10,7 @@ interface ShopPopupProps {
 }
 
 export default function ShopPopup({ shop }: ShopPopupProps) {
-  const isOpen = isShopOpen(shop.open_time, shop.close_time);
+  const isOpen = isShopOpen(shop.openTime, shop.closeTime);
 
   return (
     <div className="p-2 min-w-[280px]">
@@ -36,14 +36,14 @@ export default function ShopPopup({ shop }: ShopPopupProps) {
           <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
           <span className="font-semibold text-gray-800">{shop.rating}</span>
           <span className="text-gray-500 text-sm">
-            ({shop.review_count} đánh giá)
+            ({shop.reviewCount} đánh giá)
           </span>
         </div>
       )}
 
       {/* Category Badge */}
       <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs mb-2 font-medium">
-        {shop.category_name}
+        {shop.categoryName}
       </span>
 
       {/* Address */}
@@ -56,7 +56,7 @@ export default function ShopPopup({ shop }: ShopPopupProps) {
       <div className="flex gap-2 text-sm mb-3">
         <Clock className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-600" />
         <span className="text-gray-600">
-          {shop.open_time} - {shop.close_time}
+          {shop.openTime} - {shop.closeTime}
           <span
             className={`ml-2 font-semibold ${
               isOpen ? 'text-green-600' : 'text-red-600'

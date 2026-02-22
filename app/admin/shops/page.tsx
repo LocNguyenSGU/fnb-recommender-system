@@ -5,18 +5,18 @@ import AdminLayout from '@/components/Admin/AdminLayout';
 import DataTable from '@/components/Admin/DataTable';
 import ModalForm from '@/components/Admin/ModalForm';
 import { ToastContainer, useToast } from '@/components/Admin/Toast';
-import { shopAPI } from '@/lib/api';
+import shopsApi from '@/lib/shops';
 import { Shop } from '@/lib/types';
 
 const fields = [
-  { key: 'owner_id', label: 'Owner ID', type: 'number' as const, required: true },
-  { key: 'category_id', label: 'Category ID', type: 'number' as const },
+  { key: 'ownerId', label: 'Owner ID', type: 'number' as const, required: true },
+  { key: 'categoryId', label: 'Category ID', type: 'number' as const },
   { key: 'name', label: 'Name', type: 'text' as const, required: true },
   { key: 'address', label: 'Address', type: 'textarea' as const },
   { key: 'latitude', label: 'Latitude', type: 'number' as const },
   { key: 'longitude', label: 'Longitude', type: 'number' as const },
-  { key: 'open_time', label: 'Open Time', type: 'text' as const },
-  { key: 'close_time', label: 'Close Time', type: 'text' as const },
+  { key: 'openTime', label: 'Open Time', type: 'text' as const },
+  { key: 'closeTime', label: 'Close Time', type: 'text' as const },
   {
     key: 'status',
     label: 'Status',
@@ -35,15 +35,15 @@ const columns = [
   { key: 'name' as keyof Shop, label: 'Name' },
   { key: 'address' as keyof Shop, label: 'Address' },
   { key: 'status' as keyof Shop, label: 'Status' },
-  { key: 'owner_id' as keyof Shop, label: 'Owner ID' },
-  { key: 'category_id' as keyof Shop, label: 'Category ID' },
+  { key: 'ownerId' as keyof Shop, label: 'Owner ID' },
+  { key: 'categoryId' as keyof Shop, label: 'Category ID' },
   {
     key: 'images' as keyof Shop,
     label: 'Images',
     render: (value: string[]) => `${value.length} images`,
   },
   {
-    key: 'created_at' as keyof Shop,
+    key: 'createdAt' as keyof Shop,
     label: 'Created',
     render: (value: string) => new Date(value).toLocaleDateString(),
   },
@@ -51,6 +51,7 @@ const columns = [
 
 export default function ShopsPage() {
   const [shops, setShops] = useState<Shop[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingShop, setEditingShop] = useState<Shop | null>(null);
   const { toasts, addToast, removeToast } = useToast();
@@ -59,8 +60,16 @@ export default function ShopsPage() {
     loadShops();
   }, []);
 
-  const loadShops = () => {
-    setShops(shopAPI.getAll());
+  const loadShops = async () => {
+    try {
+      setLoading(true);
+      const response = await (shopsApi as any).getAll();
+      setShops(response.data);
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to load shops', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAdd = () => {
@@ -73,13 +82,17 @@ export default function ShopsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    shopAPI.delete(id);
-    loadShops();
-    addToast('Shop deleted successfully', 'success');
+  const handleDelete = async (id: number) => {
+    try {
+      await (shopsApi as any).remove(id);
+      addToast('Shop deleted successfully', 'success');
+      loadShops();
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to delete shop', 'error');
+    }
   };
 
-  const handleSubmit = (data: Record<string, any>) => {
+  const handleSubmit = async (data: Record<string, any>) => {
     try {
       // Parse images JSON
       if (data.images && typeof data.images === 'string') {
@@ -91,16 +104,16 @@ export default function ShopsPage() {
       }
 
       if (editingShop) {
-        shopAPI.update(editingShop.id, data as any);
+        await (shopsApi as any).update(editingShop.id, data);
         addToast('Shop updated successfully', 'success');
       } else {
-        shopAPI.create(data as any);
+        await (shopsApi as any).create(data);
         addToast('Shop created successfully', 'success');
       }
       loadShops();
       setIsModalOpen(false);
-    } catch (error) {
-      addToast('An error occurred', 'error');
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'An error occurred', 'error');
     }
   };
 
@@ -125,6 +138,7 @@ export default function ShopsPage() {
           columns={columns}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          loading={loading}
         />
 
         <ModalForm

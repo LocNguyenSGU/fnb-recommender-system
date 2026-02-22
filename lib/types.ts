@@ -28,19 +28,19 @@ export interface Category {
 
 export interface Shop {
   id: number;
-  owner_id: number;
-  category_id?: number;
-  category_name?: string;
+  ownerId: number;
+  categoryId?: number;
+  categoryName?: string;
   name: string;
   address: string;
   latitude: number;
   longitude: number;
-  open_time: string;
-  close_time: string;
+  openTime: string;
+  closeTime: string;
   status: 'pending' | 'approved' | 'rejected';
   images: string[];
   rating?: number;
-  review_count?: number;
+  reviewCount?: number;
   createdAt: string;
   updatedAt: string;
 }

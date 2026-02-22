@@ -42,7 +42,7 @@ export default function MapView({ shops, selectedCategory, onMapReady, userLocat
 
   // Filter shops by category
   const filteredShops = selectedCategory
-    ? shops.filter((s) => s.category_id === selectedCategory)
+    ? shops.filter((s) => s.categoryId === selectedCategory)
     : shops;
 
   return (

@@ -74,7 +74,7 @@ export default function AdminDashboard() {
       ];
 
       const categoryCounts = categories.map(category => {
-        const count = shops.filter(shop => shop.category_id === category.id).length;
+        const count = shops.filter(shop => shop.categoryId === category.id).length;
         return {
           name: category.name,
           value: count,
