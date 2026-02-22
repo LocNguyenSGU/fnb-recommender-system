@@ -5,12 +5,12 @@ import AdminLayout from '@/components/Admin/AdminLayout';
 import DataTable from '@/components/Admin/DataTable';
 import ModalForm from '@/components/Admin/ModalForm';
 import { ToastContainer, useToast } from '@/components/Admin/Toast';
-import { reviewAPI } from '@/lib/api';
+import reviewsApi from '@/lib/reviews';
 import { Review } from '@/lib/types';
 
 const fields = [
-  { key: 'user_id', label: 'User ID', type: 'number' as const, required: true },
-  { key: 'shop_id', label: 'Shop ID', type: 'number' as const, required: true },
+  { key: 'userId', label: 'User ID', type: 'number' as const, required: true },
+  { key: 'shopId', label: 'Shop ID', type: 'number' as const, required: true },
   {
     key: 'rating',
     label: 'Rating',
@@ -32,10 +32,10 @@ const columns = [
   { key: 'id' as keyof Review, label: 'ID' },
   { key: 'rating' as keyof Review, label: 'Rating', render: (value: number) => `${value} ⭐` },
   { key: 'content' as keyof Review, label: 'Content', render: (value: string) => value.length > 50 ? `${value.substring(0, 50)}...` : value },
-  { key: 'user_id' as keyof Review, label: 'User ID' },
-  { key: 'shop_id' as keyof Review, label: 'Shop ID' },
+  { key: 'userId' as keyof Review, label: 'User ID' },
+  { key: 'shopId' as keyof Review, label: 'Shop ID' },
   {
-    key: 'created_at' as keyof Review,
+    key: 'createdAt' as keyof Review,
     label: 'Created',
     render: (value: string) => new Date(value).toLocaleDateString(),
   },
@@ -43,6 +43,7 @@ const columns = [
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<Review | null>(null);
   const { toasts, addToast, removeToast } = useToast();
@@ -51,8 +52,16 @@ export default function ReviewsPage() {
     loadReviews();
   }, []);
 
-  const loadReviews = () => {
-    setReviews(reviewAPI.getAll());
+  const loadReviews = async () => {
+    try {
+      setLoading(true);
+      const response = await (reviewsApi as any).getAll();
+      setReviews(response.data);
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to load reviews', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAdd = () => {
@@ -65,13 +74,17 @@ export default function ReviewsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    reviewAPI.delete(id);
-    loadReviews();
-    addToast('Review deleted successfully', 'success');
+  const handleDelete = async (id: number) => {
+    try {
+      await (reviewsApi as any).remove(id);
+      addToast('Review deleted successfully', 'success');
+      loadReviews();
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to delete review', 'error');
+    }
   };
 
-  const handleSubmit = (data: Record<string, any>) => {
+  const handleSubmit = async (data: Record<string, any>) => {
     try {
       if (data.replies && typeof data.replies === 'string') {
         try {
@@ -82,16 +95,16 @@ export default function ReviewsPage() {
       }
 
       if (editingReview) {
-        reviewAPI.update(editingReview.id, data as any);
+        await (reviewsApi as any).update(editingReview.id, data);
         addToast('Review updated successfully', 'success');
       } else {
-        reviewAPI.create(data as any);
+        await (reviewsApi as any).create(data);
         addToast('Review created successfully', 'success');
       }
       loadReviews();
       setIsModalOpen(false);
-    } catch (error) {
-      addToast('An error occurred', 'error');
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'An error occurred', 'error');
     }
   };
 
@@ -116,6 +129,7 @@ export default function ReviewsPage() {
           columns={columns}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          loading={loading}
         />
 
         <ModalForm

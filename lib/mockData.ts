@@ -832,8 +832,8 @@ export const MOCK_MENU_ITEMS: MenuItem[] = [
 export const MOCK_REVIEWS: Review[] = [
   {
     id: 1,
-    user_id: 2,
-    shop_id: 1,
+    userId: 2,
+    shopId: 1,
     rating: 5,
     content: 'Amazing pho! Best in the city.',
     replies: [],
@@ -842,8 +842,8 @@ export const MOCK_REVIEWS: Review[] = [
   },
   {
     id: 2,
-    user_id: 3,
-    shop_id: 1,
+    userId: 3,
+    shopId: 1,
     rating: 4,
     content: 'Great food and service. Will come back!',
     replies: [],

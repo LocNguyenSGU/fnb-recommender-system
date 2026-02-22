@@ -71,8 +71,8 @@ export interface MenuItem {
 
 export interface Review {
   id: number;
-  user_id: number;
-  shop_id: number;
+  userId: number;
+  shopId: number;
   rating: number;
   content: string;
   replies: any[];
