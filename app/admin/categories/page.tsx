@@ -5,7 +5,7 @@ import AdminLayout from '@/components/Admin/AdminLayout';
 import DataTable from '@/components/Admin/DataTable';
 import ModalForm from '@/components/Admin/ModalForm';
 import { ToastContainer, useToast } from '@/components/Admin/Toast';
-import { categoryAPI } from '@/lib/api';
+import categoriesApi from '@/lib/categories';
 import { Category } from '@/lib/types';
 
 const fields = [
@@ -18,7 +18,7 @@ const columns = [
   { key: 'name' as keyof Category, label: 'Name' },
   { key: 'description' as keyof Category, label: 'Description' },
   {
-    key: 'created_at' as keyof Category,
+    key: 'createdAt' as keyof Category,
     label: 'Created',
     render: (value: string) => new Date(value).toLocaleDateString(),
   },
@@ -26,6 +26,7 @@ const columns = [
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const { toasts, addToast, removeToast } = useToast();
@@ -34,8 +35,16 @@ export default function CategoriesPage() {
     loadCategories();
   }, []);
 
-  const loadCategories = () => {
-    setCategories(categoryAPI.getAll());
+  const loadCategories = async () => {
+    try {
+      setLoading(true);
+      const data = await (categoriesApi as any).getAll();
+      setCategories(data);
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to load categories', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAdd = () => {
@@ -48,25 +57,29 @@ export default function CategoriesPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    categoryAPI.delete(id);
-    loadCategories();
-    addToast('Category deleted successfully', 'success');
+  const handleDelete = async (id: number) => {
+    try {
+      await (categoriesApi as any).remove(id);
+      loadCategories();
+      addToast('Category deleted successfully', 'success');
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to delete category', 'error');
+    }
   };
 
-  const handleSubmit = (data: Record<string, any>) => {
+  const handleSubmit = async (data: Record<string, any>) => {
     try {
       if (editingCategory) {
-        categoryAPI.update(editingCategory.id, data as any);
+        await (categoriesApi as any).update(editingCategory.id, data);
         addToast('Category updated successfully', 'success');
       } else {
-        categoryAPI.create(data as any);
+        await (categoriesApi as any).create(data);
         addToast('Category created successfully', 'success');
       }
       loadCategories();
       setIsModalOpen(false);
-    } catch (error) {
-      addToast('An error occurred', 'error');
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'An error occurred', 'error');
     }
   };
 
@@ -91,6 +104,7 @@ export default function CategoriesPage() {
           columns={columns}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          loading={loading}
         />
 
         <ModalForm
