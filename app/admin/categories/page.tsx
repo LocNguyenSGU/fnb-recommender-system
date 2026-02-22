@@ -38,8 +38,8 @@ export default function CategoriesPage() {
   const loadCategories = async () => {
     try {
       setLoading(true);
-      const data = await (categoriesApi as any).getAll();
-      setCategories(data);
+      const response = await (categoriesApi as any).getAll();
+      setCategories(response.data);
     } catch (error: any) {
       addToast(error.response?.data?.message || 'Failed to load categories', 'error');
     } finally {

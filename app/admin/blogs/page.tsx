@@ -53,8 +53,8 @@ export default function BlogsPage() {
   const loadBlogs = async () => {
     try {
       setLoading(true);
-      const data = await (blogsApi as any).getAll();
-      setBlogs(data);
+      const response = await (blogsApi as any).getAll();
+      setBlogs(response.data);
     } catch (error: any) {
       addToast(error.response?.data?.message || 'Failed to load blogs', 'error');
     } finally {

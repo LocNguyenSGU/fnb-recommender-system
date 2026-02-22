@@ -41,8 +41,8 @@ export default function CommentsPage() {
   const loadComments = async () => {
     try {
       setLoading(true);
-      const data = await (commentsApi as any).getAll();
-      setComments(data);
+      const response = await (commentsApi as any).getAll();
+      setComments(response.data);
     } catch (error: any) {
       addToast(error.response?.data?.message || 'Failed to load comments', 'error');
     } finally {

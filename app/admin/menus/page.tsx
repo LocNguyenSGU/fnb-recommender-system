@@ -44,8 +44,8 @@ export default function MenusPage() {
   const loadMenus = async () => {
     try {
       setLoading(true);
-      const data = await (menusApi as any).getAll();
-      setMenus(data);
+      const response = await (menusApi as any).getAll();
+      setMenus(response.data);
     } catch (error: any) {
       addToast(error.response?.data?.message || 'Failed to load menus', 'error');
     } finally {

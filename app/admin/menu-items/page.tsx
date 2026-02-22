@@ -48,8 +48,8 @@ export default function MenuItemsPage() {
   const loadMenuItems = async () => {
     try {
       setLoading(true);
-      const data = await (menuItemsApi as any).getAll();
-      setMenuItems(data);
+      const response = await (menuItemsApi as any).getAll();
+      setMenuItems(response.data);
     } catch (error: any) {
       addToast(error.response?.data?.message || 'Failed to load menu items', 'error');
     } finally {
