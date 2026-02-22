@@ -5,7 +5,7 @@ import AdminLayout from '@/components/Admin/AdminLayout';
 import DataTable from '@/components/Admin/DataTable';
 import ModalForm from '@/components/Admin/ModalForm';
 import { ToastContainer, useToast } from '@/components/Admin/Toast';
-import users from '@/lib/users';
+import usersApi from '@/lib/users';
 import { User } from '@/lib/types';
 
 const fields = [
@@ -66,7 +66,7 @@ export default function UsersPage() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const response = await users.getAll();
+      const response = await (usersApi as any).getAll();
       setUsers(response.data);
     } catch (error: any) {
       addToast(error.response?.data?.message || 'Failed to load users', 'error');
@@ -87,7 +87,7 @@ export default function UsersPage() {
 
   const handleDelete = async (id: number) => {
     try {
-      await users.remove(id);
+      await (usersApi as any).remove(id);
       addToast('User deleted successfully', 'success');
       loadUsers();
     } catch (error: any) {
@@ -98,10 +98,10 @@ export default function UsersPage() {
   const handleSubmit = async (data: Record<string, any>) => {
     try {
       if (editingUser) {
-        await users.update(editingUser.id, data);
+        await (usersApi as any).update(editingUser.id, data);
         addToast('User updated successfully', 'success');
       } else {
-        await users.create(data);
+        await (usersApi as any).create(data);
         addToast('User created successfully', 'success');
       }
       loadUsers();

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 interface Column<T> {
   key: keyof T;
@@ -13,6 +14,7 @@ interface DataTableProps<T> {
   columns: Column<T>[];
   onEdit: (item: T) => void;
   onDelete: (id: number) => void;
+  loading?: boolean;
 }
 
 export default function DataTable<T extends { id: number }>({
@@ -20,6 +22,7 @@ export default function DataTable<T extends { id: number }>({
   columns,
   onEdit,
   onDelete,
+  loading = false,
 }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -59,7 +62,12 @@ export default function DataTable<T extends { id: number }>({
         />
       </div>
 
-      <div className="overflow-x-auto">
+      {loading ? (
+        <div className="flex justify-center items-center py-12">
+          <LoadingSpinner />
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
@@ -105,6 +113,7 @@ export default function DataTable<T extends { id: number }>({
           </tbody>
         </table>
       </div>
+      )}
 
       {currentData.length === 0 && (
         <div className="text-center py-8 text-gray-500">
