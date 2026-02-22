@@ -5,11 +5,11 @@ import AdminLayout from '@/components/Admin/AdminLayout';
 import DataTable from '@/components/Admin/DataTable';
 import ModalForm from '@/components/Admin/ModalForm';
 import { ToastContainer, useToast } from '@/components/Admin/Toast';
-import { blogAPI } from '@/lib/api';
+import blogsApi from '@/lib/blogs';
 import { Blog } from '@/lib/types';
 
 const fields = [
-  { key: 'author_id', label: 'Author ID', type: 'number' as const, required: true },
+  { key: 'authorId', label: 'Author ID', type: 'number' as const, required: true },
   { key: 'title', label: 'Title', type: 'text' as const, required: true },
   { key: 'content', label: 'Content', type: 'textarea' as const },
   {
@@ -23,17 +23,17 @@ const fields = [
     ],
   },
   { key: 'images', label: 'Images (JSON array)', type: 'textarea' as const },
-  { key: 'likes_count', label: 'Likes Count', type: 'number' as const },
+  { key: 'likesCount', label: 'Likes Count', type: 'number' as const },
 ];
 
 const columns = [
   { key: 'id' as keyof Blog, label: 'ID' },
   { key: 'title' as keyof Blog, label: 'Title', render: (value: string) => value.length > 30 ? `${value.substring(0, 30)}...` : value },
   { key: 'status' as keyof Blog, label: 'Status' },
-  { key: 'author_id' as keyof Blog, label: 'Author ID' },
-  { key: 'likes_count' as keyof Blog, label: 'Likes' },
+  { key: 'authorId' as keyof Blog, label: 'Author ID' },
+  { key: 'likesCount' as keyof Blog, label: 'Likes' },
   {
-    key: 'created_at' as keyof Blog,
+    key: 'createdAt' as keyof Blog,
     label: 'Created',
     render: (value: string) => new Date(value).toLocaleDateString(),
   },
@@ -41,6 +41,7 @@ const columns = [
 
 export default function BlogsPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const { toasts, addToast, removeToast } = useToast();
@@ -49,8 +50,16 @@ export default function BlogsPage() {
     loadBlogs();
   }, []);
 
-  const loadBlogs = () => {
-    setBlogs(blogAPI.getAll());
+  const loadBlogs = async () => {
+    try {
+      setLoading(true);
+      const data = await (blogsApi as any).getAll();
+      setBlogs(data);
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to load blogs', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAdd = () => {
@@ -63,13 +72,17 @@ export default function BlogsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    blogAPI.delete(id);
-    loadBlogs();
-    addToast('Blog deleted successfully', 'success');
+  const handleDelete = async (id: number) => {
+    try {
+      await (blogsApi as any).remove(id);
+      loadBlogs();
+      addToast('Blog deleted successfully', 'success');
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to delete blog', 'error');
+    }
   };
 
-  const handleSubmit = (data: Record<string, any>) => {
+  const handleSubmit = async (data: Record<string, any>) => {
     try {
       if (data.images && typeof data.images === 'string') {
         try {
@@ -80,16 +93,16 @@ export default function BlogsPage() {
       }
 
       if (editingBlog) {
-        blogAPI.update(editingBlog.id, data as any);
+        await (blogsApi as any).update(editingBlog.id, data);
         addToast('Blog updated successfully', 'success');
       } else {
-        blogAPI.create(data as any);
+        await (blogsApi as any).create(data);
         addToast('Blog created successfully', 'success');
       }
       loadBlogs();
       setIsModalOpen(false);
-    } catch (error) {
-      addToast('An error occurred', 'error');
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'An error occurred', 'error');
     }
   };
 
@@ -114,6 +127,7 @@ export default function BlogsPage() {
           columns={columns}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          loading={loading}
         />
 
         <ModalForm
