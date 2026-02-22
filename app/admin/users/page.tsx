@@ -11,12 +11,12 @@ import { User } from '@/lib/types';
 const fields = [
   { key: 'username', label: 'Username', type: 'text' as const, required: true },
   { key: 'password', label: 'Password', type: 'password' as const },
-  { key: 'full_name', label: 'Full Name', type: 'text' as const, required: true },
+  { key: 'fullName', label: 'Full Name', type: 'text' as const, required: true },
   { key: 'email', label: 'Email', type: 'email' as const, required: true },
   { key: 'phone', label: 'Phone', type: 'text' as const },
-  { key: 'avatar_url', label: 'Avatar URL', type: 'text' as const },
-  { key: 'google_id', label: 'Google ID', type: 'text' as const },
-  { key: 'facebook_id', label: 'Facebook ID', type: 'text' as const },
+  { key: 'avatarUrl', label: 'Avatar URL', type: 'text' as const },
+  { key: 'googleId', label: 'Google ID', type: 'text' as const },
+  { key: 'facebookId', label: 'Facebook ID', type: 'text' as const },
   {
     key: 'provider',
     label: 'Provider',
@@ -42,7 +42,7 @@ const fields = [
 const columns = [
   { key: 'id' as keyof User, label: 'ID' },
   { key: 'username' as keyof User, label: 'Username' },
-  { key: 'full_name' as keyof User, label: 'Full Name' },
+  { key: 'fullName' as keyof User, label: 'Full Name' },
   { key: 'email' as keyof User, label: 'Email' },
   { key: 'role' as keyof User, label: 'Role' },
   {

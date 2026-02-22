@@ -4,12 +4,12 @@ export interface User {
   id: number;
   username: string;
   password?: string;
-  full_name: string;
+  fullName: string;
   email: string;
   phone: string;
-  avatar_url?: string;
-  google_id?: string;
-  facebook_id?: string;
+  avatarUrl?: string;
+  googleId?: string;
+  facebookId?: string;
   provider: 'local' | 'google' | 'facebook';
   role: 'user' | 'admin' | 'owner';
   createdAt: string;
