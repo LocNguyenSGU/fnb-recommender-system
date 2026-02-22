@@ -5,17 +5,17 @@ import AdminLayout from '@/components/Admin/AdminLayout';
 import DataTable from '@/components/Admin/DataTable';
 import ModalForm from '@/components/Admin/ModalForm';
 import { ToastContainer, useToast } from '@/components/Admin/Toast';
-import { menuItemAPI } from '@/lib/api';
+import menuItemsApi from '@/lib/menuItems';
 import { MenuItem } from '@/lib/types';
 
 const fields = [
-  { key: 'menu_id', label: 'Menu ID', type: 'number' as const, required: true },
+  { key: 'menuId', label: 'Menu ID', type: 'number' as const, required: true },
   { key: 'name', label: 'Name', type: 'text' as const, required: true },
   { key: 'description', label: 'Description', type: 'textarea' as const },
   { key: 'price', label: 'Price', type: 'number' as const, required: true },
-  { key: 'is_available', label: 'Available', type: 'checkbox' as const },
-  { key: 'is_hot', label: 'Hot', type: 'checkbox' as const },
-  { key: 'is_signature', label: 'Signature', type: 'checkbox' as const },
+  { key: 'isAvailable', label: 'Available', type: 'checkbox' as const },
+  { key: 'isHot', label: 'Hot', type: 'checkbox' as const },
+  { key: 'isSignature', label: 'Signature', type: 'checkbox' as const },
   { key: 'images', label: 'Images (JSON array)', type: 'textarea' as const },
 ];
 
@@ -23,12 +23,12 @@ const columns = [
   { key: 'id' as keyof MenuItem, label: 'ID' },
   { key: 'name' as keyof MenuItem, label: 'Name' },
   { key: 'price' as keyof MenuItem, label: 'Price', render: (value: number) => `$${value.toFixed(2)}` },
-  { key: 'is_available' as keyof MenuItem, label: 'Available', render: (value: boolean) => value ? 'Yes' : 'No' },
-  { key: 'is_hot' as keyof MenuItem, label: 'Hot', render: (value: boolean) => value ? 'Yes' : 'No' },
-  { key: 'is_signature' as keyof MenuItem, label: 'Signature', render: (value: boolean) => value ? 'Yes' : 'No' },
-  { key: 'menu_id' as keyof MenuItem, label: 'Menu ID' },
+  { key: 'isAvailable' as keyof MenuItem, label: 'Available', render: (value: boolean) => value ? 'Yes' : 'No' },
+  { key: 'isHot' as keyof MenuItem, label: 'Hot', render: (value: boolean) => value ? 'Yes' : 'No' },
+  { key: 'isSignature' as keyof MenuItem, label: 'Signature', render: (value: boolean) => value ? 'Yes' : 'No' },
+  { key: 'menuId' as keyof MenuItem, label: 'Menu ID' },
   {
-    key: 'created_at' as keyof MenuItem,
+    key: 'createdAt' as keyof MenuItem,
     label: 'Created',
     render: (value: string) => new Date(value).toLocaleDateString(),
   },
@@ -36,6 +36,7 @@ const columns = [
 
 export default function MenuItemsPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMenuItem, setEditingMenuItem] = useState<MenuItem | null>(null);
   const { toasts, addToast, removeToast } = useToast();
@@ -44,8 +45,16 @@ export default function MenuItemsPage() {
     loadMenuItems();
   }, []);
 
-  const loadMenuItems = () => {
-    setMenuItems(menuItemAPI.getAll());
+  const loadMenuItems = async () => {
+    try {
+      setLoading(true);
+      const data = await (menuItemsApi as any).getAll();
+      setMenuItems(data);
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to load menu items', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAdd = () => {
@@ -58,13 +67,17 @@ export default function MenuItemsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    menuItemAPI.delete(id);
-    loadMenuItems();
-    addToast('Menu item deleted successfully', 'success');
+  const handleDelete = async (id: number) => {
+    try {
+      await (menuItemsApi as any).remove(id);
+      loadMenuItems();
+      addToast('Menu item deleted successfully', 'success');
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'Failed to delete menu item', 'error');
+    }
   };
 
-  const handleSubmit = (data: Record<string, any>) => {
+  const handleSubmit = async (data: Record<string, any>) => {
     try {
       if (data.images && typeof data.images === 'string') {
         try {
@@ -75,16 +88,16 @@ export default function MenuItemsPage() {
       }
 
       if (editingMenuItem) {
-        menuItemAPI.update(editingMenuItem.id, data as any);
+        await (menuItemsApi as any).update(editingMenuItem.id, data);
         addToast('Menu item updated successfully', 'success');
       } else {
-        menuItemAPI.create(data as any);
+        await (menuItemsApi as any).create(data);
         addToast('Menu item created successfully', 'success');
       }
       loadMenuItems();
       setIsModalOpen(false);
-    } catch (error) {
-      addToast('An error occurred', 'error');
+    } catch (error: any) {
+      addToast(error.response?.data?.message || 'An error occurred', 'error');
     }
   };
 
@@ -109,6 +122,7 @@ export default function MenuItemsPage() {
           columns={columns}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          loading={loading}
         />
 
         <ModalForm
