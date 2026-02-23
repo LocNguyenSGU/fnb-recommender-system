@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Nav from '@/components/dashboard/nav';
 import { useAuthStore } from '@/store/authStore';
+import { X } from 'lucide-react';
 
+/** Sign-up page: same overlay + blur style as sign-in modal, centered card. */
 export default function RegisterPage() {
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -20,21 +22,49 @@ export default function RegisterPage() {
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Nav />
 
-      <div className="pt-32 pb-20 px-6 flex flex-col items-center justify-center">
-        <div className="max-w-md w-full mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Create an account</h1>
-          <p className="text-gray-600 mb-8">
-            Sign up to write blog posts and join the community.
-          </p>
-          <p className="text-sm text-gray-500 mb-6">
-            Registration form can be added here (e.g. email, password, name).
-          </p>
-          <Link
-            href="/login"
-            className="text-blue-600 font-medium hover:underline"
-          >
-            Already have an account? Sign in
-          </Link>
+      {/* Full-screen overlay with blur (same z-index and effect as sign-in modal) */}
+      <div
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+        aria-modal
+        role="dialog"
+      >
+        <Link
+          href="/"
+          className="absolute inset-0 bg-black/30 backdrop-blur-md transition-opacity"
+          aria-label="Close"
+        />
+        <div
+          className="relative z-[101] w-full max-w-sm max-h-[90vh] min-h-[320px] flex flex-col rounded-2xl bg-white shadow-2xl border border-gray-100 overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between shrink-0 px-6 py-4 border-b border-gray-100">
+            <h2 className="text-xl font-bold text-gray-900">Create an account</h2>
+            <Link
+              href="/"
+              className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </Link>
+          </div>
+          <div className="flex-1 overflow-y-auto flex flex-col min-h-0 p-6">
+            <div className="flex-1 min-h-0 flex flex-col items-center justify-center w-full">
+              <p className="text-gray-600 text-sm mb-6 text-center">
+                Sign up to write blog posts and join the community.
+              </p>
+              <div className="w-full max-w-sm mx-auto space-y-6">
+                <p className="text-sm text-gray-500 text-center">
+                  Registration form can be added here (e.g. email, password, name).
+                </p>
+                <Link
+                  href="/?signin=1"
+                  className="block w-full py-3 px-4 text-center bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition"
+                >
+                  Already have an account? Sign in
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </main>

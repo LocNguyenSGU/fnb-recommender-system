@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { useAuthStore } from '@/store/authStore';
 import { logout as apiLogout } from '@/lib/api/userApi';
@@ -11,10 +11,18 @@ import { LogOut, ChevronDown } from 'lucide-react';
 
 export default function Nav() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, isAuthenticated, logout } = useAuthStore();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (searchParams.get('signin') === '1') {
+      setSignInOpen(true);
+      router.replace('/', { scroll: false });
+    }
+  }, [searchParams, router]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
