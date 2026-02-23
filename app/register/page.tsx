@@ -2,10 +2,11 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import Nav from '@/components/dashboard/nav';
 import { useAuthStore } from '@/store/authStore';
 import { X } from 'lucide-react';
+import RegisterForm from '@/components/auth/RegisterForm';
+import Link from 'next/link';
 
 /** Sign-up page: same overlay + blur style as sign-in modal, centered card. */
 export default function RegisterPage() {
@@ -52,17 +53,18 @@ export default function RegisterPage() {
               <p className="text-gray-600 text-sm mb-6 text-center">
                 Sign up to write blog posts and join the community.
               </p>
-              <div className="w-full max-w-sm mx-auto space-y-6">
-                <p className="text-sm text-gray-500 text-center">
-                  Registration form can be added here (e.g. email, password, name).
-                </p>
+              <div className="w-full flex justify-center mb-6">
+                <RegisterForm />
+              </div>
+              <p className="text-center text-sm text-gray-600">
+                Already have an account?{' '}
                 <Link
                   href="/?signin=1"
-                  className="block w-full py-3 px-4 text-center bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition"
+                  className="text-blue-600 font-medium hover:underline"
                 >
-                  Already have an account? Sign in
+                  Sign in
                 </Link>
-              </div>
+              </p>
             </div>
           </div>
         </div>

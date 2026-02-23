@@ -52,7 +52,7 @@ export default function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      className="fixed inset-0 z-40 flex justify-center items-start pt-28 p-4"
       aria-modal
       role="dialog"
     >
@@ -64,7 +64,7 @@ export default function Modal({
         aria-label="Close"
       />
 
-      {/* Content panel - above backdrop, centered in viewport */}
+      {/* Content panel - above backdrop, visually centered below navbar */}
       <div
         className={`relative z-[101] w-full ${maxWidthClass[maxWidth]} max-h-[90vh] min-h-[320px] flex flex-col rounded-2xl bg-white shadow-2xl border border-gray-100 overflow-hidden`}
         onClick={(e) => e.stopPropagation()}
