@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import Image from 'next/image';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 
@@ -9,45 +10,66 @@ gsap.registerPlugin(ScrollTrigger);
 interface BlogHeaderProps {
   title?: string;
   subtitle?: string;
+  imageUrl?: string;
 }
 
 export default function BlogHeader({
   title = 'FOOD & LIFESTYLE BLOG',
   subtitle = 'Discover amazing food stories, restaurant reviews, and culinary trends',
+  imageUrl = '/img/food-banner.png', // put your image in public/images
 }: BlogHeaderProps) {
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
   const headerRef = useRef(null);
 
   useEffect(() => {
-    // Animate title
-  
+    gsap.fromTo(
+      titleRef.current,
+      { x: -100, opacity: 0 },
+      { x: 0, opacity: 1, duration: 1, ease: 'power3.out' }
+    );
 
-  
-
+    gsap.fromTo(
+      subtitleRef.current,
+      { x: -80, opacity: 0 },
+      { x: 0, opacity: 1, duration: 1.2, delay: 0.2, ease: 'power3.out' }
+    );
   }, []);
 
   return (
     <div
       ref={headerRef}
-      className="w-full bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 py-20 px-6 mb-12 rounded-2xl shadow-2xl relative overflow-hidden"
+      className="relative w-full h-[500px] rounded-2xl overflow-hidden shadow-2xl mb-12"
     >
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-1/3 translate-y-1/3"></div>
-      </div>
+      {/* Background Image */}
+      <Image
+        src={imageUrl}
+        alt="Blog header"
+        fill
+        priority
+        className="object-cover"
+      />
 
-      <div className="max-w-4xl mx-auto text-center relative z-10">
-        <h1
-          ref={titleRef}
-          className="text-6xl md:text-7xl font-bold text-white mb-4 leading-tight drop-shadow-lg"
-        >
-          {title}
-        </h1>
-        <p ref={subtitleRef} className="text-lg md:text-xl text-blue-100 drop-shadow">
-          {subtitle}
-        </p>
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent"></div>
+
+      {/* Content */}
+      <div className="relative z-10 h-full flex items-center px-8 md:px-16">
+        <div className="max-w-xl text-left text-white">
+          <h1
+            ref={titleRef}
+            className="text-5xl md:text-6xl font-bold mb-4 leading-tight"
+          >
+            {title}
+          </h1>
+
+          <p
+            ref={subtitleRef}
+            className="text-lg md:text-xl text-gray-200"
+          >
+            {subtitle}
+          </p>
+        </div>
       </div>
     </div>
   );

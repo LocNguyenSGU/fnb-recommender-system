@@ -64,9 +64,9 @@ export default function Modal({
         aria-label="Close"
       />
 
-      {/* Content panel - above backdrop */}
+      {/* Content panel - above backdrop, centered in viewport */}
       <div
-        className={`relative z-[101] w-full ${maxWidthClass[maxWidth]} max-h-[90vh] flex flex-col rounded-2xl bg-white shadow-2xl border border-gray-100 overflow-hidden`}
+        className={`relative z-[101] w-full ${maxWidthClass[maxWidth]} max-h-[90vh] min-h-[320px] flex flex-col rounded-2xl bg-white shadow-2xl border border-gray-100 overflow-hidden`}
         onClick={(e) => e.stopPropagation()}
       >
         {(title || showCloseButton) && (
@@ -86,7 +86,7 @@ export default function Modal({
             )}
           </div>
         )}
-        <div className="flex-1 overflow-y-auto">{children}</div>
+        <div className="flex-1 overflow-y-auto flex flex-col min-h-0">{children}</div>
       </div>
     </div>
   );
