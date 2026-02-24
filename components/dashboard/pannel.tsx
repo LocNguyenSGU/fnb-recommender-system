@@ -5,9 +5,9 @@ import Image from 'next/image';
 import gsap from 'gsap';
 
 export default function Pannel() {
-  const titleRef = useRef(null);
-  const descriptionRef = useRef(null);
-  const buttonsRef = useRef(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
+  const buttonsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
    

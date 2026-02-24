@@ -78,14 +78,14 @@ export default function AdminDashboard() {
       try {
         const [usersRes, shopsRes, reviewsRes, blogsRes, categoriesRes, commentsRes, menusRes, menuItemsRes] =
           await Promise.all([
-            (usersApi as ApiGetAll).getAll(),
-            (shopsApi as ApiGetAll).getAll(),
-            (reviewsApi as ApiGetAll).getAll(),
-            (blogsApi as ApiGetAll).getAll(),
-            (categoriesApi as ApiGetAll).getAll(),
-            (commentsApi as unknown as ApiGetAll).getAll(),
-            (menusApi as ApiGetAll).getAll(),
-            (menuItemsApi as ApiGetAll).getAll(),
+            (usersApi as any).getAll(),
+            (shopsApi as any).getAll(),
+            (reviewsApi as any).getAll(),
+            (blogsApi as any).getAll(),
+            (categoriesApi as any).getAll(),
+            (commentsApi as any).getAll(),
+            (menusApi as any).getAll(),
+            (menuItemsApi as any).getAll(),
           ]);
 
         const users = toList(usersRes);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Nav from '@/components/dashboard/nav';
 import { useAuthStore } from '@/store/authStore';
@@ -21,7 +21,9 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Nav />
+      <Suspense fallback={<div className="h-16" />}>
+        <Nav />
+      </Suspense>
 
       {/* Full-screen overlay with blur (same z-index and effect as sign-in modal) */}
       <div

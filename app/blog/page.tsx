@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import Nav from '@/components/dashboard/nav';
 import BlogHeader from '@/components/blog/BlogHeader';
 import BlogList from '@/components/blog/BlogList';
@@ -159,7 +159,9 @@ export default function BlogPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Nav />
+      <Suspense fallback={<div className="h-16" />}>
+        <Nav />
+      </Suspense>
 
       <div className="pt-32 pb-12 px-6">
         <BlogHeader

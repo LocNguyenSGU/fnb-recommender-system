@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { MOCK_SHOPS } from '@/lib/mockData';
 import { generateNearbyShops } from '@/lib/utils';
 import CategoryFilter from '@/components/ui/CategoryFilter';
@@ -8,9 +9,12 @@ import LocationButton from '@/components/ui/LocationButton';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Nav from '@/components/dashboard/nav';
 import Pannel from '@/components/dashboard/pannel';
-import Map from '@/components/dashboard/map';
 import Blog from '@/components/dashboard/blog';
 import Footer from '@/components/dashboard/footer';
+
+// Dynamic import for Map component (contains Leaflet which requires window)
+const Map = dynamic(() => import('@/components/dashboard/map'), { ssr: false });
+
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
   const [mapRef, setMapRef] = useState<any>(null);
@@ -79,7 +83,9 @@ export default function HomePage() {
   return (
     <main className="relative">
       <div>
-        <Nav />
+        <Suspense fallback={<div className="h-16" />}>
+          <Nav />
+        </Suspense>
         <Pannel />
       </div>
       

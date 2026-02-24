@@ -18,9 +18,9 @@ export default function BlogHeader({
   subtitle = 'Discover amazing food stories, restaurant reviews, and culinary trends',
   imageUrl = '/img/food-banner.png', // put your image in public/images
 }: BlogHeaderProps) {
-  const titleRef = useRef(null);
-  const subtitleRef = useRef(null);
-  const headerRef = useRef(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     gsap.fromTo(

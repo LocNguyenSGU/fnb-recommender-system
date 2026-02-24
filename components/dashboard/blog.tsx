@@ -34,11 +34,11 @@ const BLOG_POSTS = [
 ];
 
 export default function Blog() {
-  const titleRef = useRef(null);
-  const descriptionRef = useRef(null);
-  const cardsRef = useRef([]);
-  const buttonRef = useRef(null);
-  const sectionRef = useRef(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
+  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Scroll trigger for title
@@ -109,6 +109,7 @@ export default function Blog() {
 
     // Add hover animations for cards
     cardsRef.current.forEach((card) => {
+      if (!card) return;
       card.addEventListener('mouseenter', () => {
         gsap.to(card, { y: -10, boxShadow: '0 20px 25px rgba(0, 0, 0, 0.15)', duration: 0.3 });
         gsap.to(card.querySelector('.emoji'), { scale: 1.1, duration: 0.3 });

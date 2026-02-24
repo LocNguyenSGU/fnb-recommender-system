@@ -4,9 +4,9 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 
 export default function Footer() {
-  const headingRef = useRef(null);
-  const descriptionRef = useRef(null);
-  const buttonRef = useRef(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     // Animate heading with split lines
@@ -26,23 +26,25 @@ export default function Footer() {
     );
 
     // Button hover animation
-    buttonRef.current.addEventListener('mouseenter', () => {
-      gsap.to(buttonRef.current, {
-        scale: 1.15,
-        boxShadow: '0 25px 50px rgba(59, 130, 246, 0.4)',
-        duration: 0.4,
-        ease: 'back.out(2)',
+    if (buttonRef.current) {
+      buttonRef.current.addEventListener('mouseenter', () => {
+        gsap.to(buttonRef.current, {
+          scale: 1.15,
+          boxShadow: '0 25px 50px rgba(59, 130, 246, 0.4)',
+          duration: 0.4,
+          ease: 'back.out(2)',
+        });
       });
-    });
 
-    buttonRef.current.addEventListener('mouseleave', () => {
-      gsap.to(buttonRef.current, {
-        scale: 1,
-        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
-        duration: 0.4,
-        ease: 'power2.out',
+      buttonRef.current.addEventListener('mouseleave', () => {
+        gsap.to(buttonRef.current, {
+          scale: 1,
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+          duration: 0.4,
+          ease: 'power2.out',
+        });
       });
-    });
+    }
 
   }, []);
 

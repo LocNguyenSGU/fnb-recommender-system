@@ -31,8 +31,8 @@ const CATEGORIES = [
 
 export default function Map({ onSearch, onCategorySelect, selectedCategory, shops, userLocation, onMapReady }: MapProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const headerRef = useRef(null);
-  const contentRef = useRef(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Scroll trigger for header - reveals gradually on scroll
