@@ -1,9 +1,7 @@
 import axios, { type AxiosInstance } from 'axios';
 
-const baseURL =
-  typeof window !== 'undefined'
-    ? process.env.NEXT_PUBLIC_API_URL || '/api'
-    : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const baseURL = apiBase.endsWith('/api') ? apiBase.replace(/\/+$/, '') : apiBase.replace(/\/?$/, '') + '/api';
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL,

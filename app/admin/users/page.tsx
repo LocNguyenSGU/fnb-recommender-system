@@ -97,11 +97,25 @@ export default function UsersPage() {
 
   const handleSubmit = async (data: Record<string, any>) => {
     try {
+      // Chuẩn hoá role cho backend (frontend dùng 'admin', backend dùng 'ROLE_admin', tương tự cho user/owner)
+      const roleMap: Record<string, string> = {
+        user: 'ROLE_USER',
+        admin: 'ROLE_ADMIN',
+        owner: 'ROLE_OWNER',
+        ROLE_USER: 'ROLE_USER',
+        ROLE_ADMIN: 'ROLE_ADMIN',
+        ROLE_OWNER: 'ROLE_OWNER',
+      };
+      const payload = {
+        ...data,
+        role: data.role ? roleMap[data.role] || data.role : data.role,
+      };
+
       if (editingUser) {
-        await (usersApi as any).update(editingUser.id, data);
+        await (usersApi as any).update(editingUser.id, payload);
         addToast('User updated successfully', 'success');
       } else {
-        await (usersApi as any).create(data);
+        await (usersApi as any).create(payload);
         addToast('User created successfully', 'success');
       }
       loadUsers();

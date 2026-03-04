@@ -13,6 +13,7 @@ export default function Nav() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isAuthenticated, logout } = useAuthStore();
+  const displayName = user?.name || (user as unknown as { fullName?: string })?.fullName || user?.email || 'User';
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -43,7 +44,7 @@ export default function Nav() {
 
   const handleLogout = async () => {
     try {
-      await apiLogout();
+      await apiLogout({ refreshToken: user?.refreshToken || '' });
     } finally {
       logout();
       setUserMenuOpen(false);
@@ -98,10 +99,10 @@ export default function Nav() {
               className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition"
             >
               <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                {user.name.charAt(0).toUpperCase()}
+                {displayName.charAt(0).toUpperCase()}
               </div>
               <span className="font-medium text-gray-700 max-w-[120px] truncate">
-                {user.name}
+                {displayName}
               </span>
               <ChevronDown
                 className={`w-4 h-4 text-gray-500 transition ${userMenuOpen ? 'rotate-180' : ''}`}
@@ -110,7 +111,7 @@ export default function Nav() {
             {userMenuOpen && (
               <div className="absolute right-0 top-full mt-2 w-48 py-1 bg-white rounded-xl shadow-lg border border-gray-100">
                 <div className="px-4 py-2 border-b border-gray-100">
-                  <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
+                  <p className="text-sm font-medium text-gray-900 truncate">{displayName}</p>
                   <p className="text-xs text-gray-500 truncate">{user.email}</p>
                 </div>
                 <button

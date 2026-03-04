@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import usersApi from '@/lib/users';
 import shopsApi from '@/lib/shops';
 import reviewsApi from '@/lib/reviews';
@@ -12,6 +13,8 @@ import menuItemsApi from '@/lib/menuItems';
 import LineChart from '@/components/Admin/LineChart';
 import BarChart from '@/components/Admin/BarChart';
 import AdminSidebar from '@/components/Admin/AdminSidebar';
+import { useAuthStore } from '@/store/authStore';
+import { logout as apiLogout } from '@/lib/api/userApi';
 
 /** API từ lib/*.js (crudFactory) có getAll; TypeScript có thể không thấy do .js */
 type ApiGetAll = { getAll: () => Promise<{ data?: unknown }> };
@@ -53,6 +56,8 @@ const models = [
 ];
 
 export default function AdminDashboard() {
+  const router = useRouter();
+  const { user, logout } = useAuthStore();
   const [stats, setStats] = useState({
     users: 0,
     shops: 0,
@@ -70,7 +75,24 @@ export default function AdminDashboard() {
 
   const [shopsByCategoryData, setShopsByCategoryData] = useState<{ name: string; value: number; color?: string }[]>([]);
 
+  const handleLogout = async () => {
+    try {
+      await apiLogout({ refreshToken: (user as any)?.refreshToken || '' });
+    } finally {
+      logout();
+      router.push('/');
+      router.refresh();
+    }
+  };
+
   useEffect(() => {
+    // Chỉ cho phép admin gọi các API thống kê
+    if (!user || (user as any)?.role !== 'admin') {
+      setStatsLoading(false);
+      setStatsError('Bạn không có quyền truy cập thống kê admin.');
+      return;
+    }
+
     // Gọi API thật (lib/users.js, lib/shops.js, ...) qua apiClient/crudFactory, tự thống kê từ getAll()
     const loadStats = async () => {
       setStatsLoading(true);
@@ -108,8 +130,12 @@ export default function AdminDashboard() {
           menuItems: menuItems.length,
         });
       } catch (error) {
-        console.error('Failed to load stats:', error);
-        setStatsError('Không tải được thống kê. Kiểm tra kết nối backend.');
+        const status = (error as any)?.response?.status;
+        if (status === 403) {
+          setStatsError('Bạn không có quyền truy cập thống kê admin.');
+        } else {
+          setStatsError('Không tải được thống kê. Kiểm tra kết nối backend.');
+        }
         setStats({
           users: 0,
           shops: 0,
@@ -152,7 +178,11 @@ export default function AdminDashboard() {
 
         setShopsByCategoryData(categoryCounts);
       } catch (error) {
-        console.error('Failed to load shops by category:', error);
+        const status = (error as any)?.response?.status;
+        if (status !== 403) {
+          // Chỉ log khi không phải lỗi quyền
+          console.error('Failed to load shops by category:', error);
+        }
         setShopsByCategoryData([]);
       }
     };
@@ -179,7 +209,10 @@ export default function AdminDashboard() {
           }))
         );
       } catch (error) {
-        console.error('Failed to load user growth:', error);
+        const status = (error as any)?.response?.status;
+        if (status !== 403) {
+          console.error('Failed to load user growth:', error);
+        }
         setUserGrowthData([]);
       }
     };
@@ -187,7 +220,7 @@ export default function AdminDashboard() {
     loadStats();
     loadShopsByCategory();
     loadUserGrowth();
-  }, []);
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -197,9 +230,20 @@ export default function AdminDashboard() {
 
         {/* Main content */}
         <div className="flex-1 p-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-2">Welcome to the F&B Recommender System Admin Panel</p>
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-gray-600 mt-2">
+                Welcome to the F&amp;B Recommender System Admin Panel
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            >
+              Logout
+            </button>
           </div>
 
           {/* Main Content Area */}
@@ -207,63 +251,65 @@ export default function AdminDashboard() {
             <div className="max-w-6xl">
               {/* Stats Cards - data from backend API */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {statsError && (
-                <div className="col-span-full p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
-                  {statsError}
-                </div>
-              )}
-              {statsLoading ? (
-                <div className="col-span-full py-8 text-center text-gray-500">Đang tải thống kê...</div>
-              ) : (
-                <>
-                  <StatsCard title="Tổng Users" value={stats.users.toString()} icon="👥" />
-                  <StatsCard title="Tổng Shops" value={stats.shops.toString()} icon="🏪" />
-                  <StatsCard title="Tổng Reviews" value={stats.reviews.toString()} icon="⭐" />
-                  <StatsCard title="Tổng Blogs" value={stats.blogs.toString()} icon="📝" />
-                  <StatsCard title="Tổng Categories" value={stats.categories.toString()} icon="📁" />
-                  <StatsCard title="Tổng Comments" value={stats.comments.toString()} icon="💬" />
-                  <StatsCard title="Tổng Menus" value={stats.menus.toString()} icon="📋" />
-                  <StatsCard title="Tổng Menu Items" value={stats.menuItems.toString()} icon="🍽️" />
-                </>
-              )}
-            </div>
+                {statsError && (
+                  <div className="col-span-full p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                    {statsError}
+                  </div>
+                )}
+                {statsLoading ? (
+                  <div className="col-span-full py-8 text-center text-gray-500">
+                    Đang tải thống kê...
+                  </div>
+                ) : (
+                  <>
+                    <StatsCard title="Tổng Users" value={stats.users.toString()} icon="👥" />
+                    <StatsCard title="Tổng Shops" value={stats.shops.toString()} icon="🏪" />
+                    <StatsCard title="Tổng Reviews" value={stats.reviews.toString()} icon="⭐" />
+                    <StatsCard title="Tổng Blogs" value={stats.blogs.toString()} icon="📝" />
+                    <StatsCard title="Tổng Categories" value={stats.categories.toString()} icon="📁" />
+                    <StatsCard title="Tổng Comments" value={stats.comments.toString()} icon="💬" />
+                    <StatsCard title="Tổng Menus" value={stats.menus.toString()} icon="📋" />
+                    <StatsCard title="Tổng Menu Items" value={stats.menuItems.toString()} icon="🍽️" />
+                  </>
+                )}
+              </div>
 
-            {/* Charts Section - Bar chart first, then Line chart */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              <BarChart data={shopsByCategoryData} title="Shops by Category" />
-              <LineChart data={userGrowthData} title="User Growth Over Time" />
-            </div>
+              {/* Charts Section - Bar chart first, then Line chart */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <BarChart data={shopsByCategoryData} title="Shops by Category" />
+                <LineChart data={userGrowthData} title="User Growth Over Time" />
+              </div>
 
-            {/* Recent Activity */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <p className="text-sm text-gray-600">New user registered: john_doe</p>
-                  <span className="text-xs text-gray-400">2 hours ago</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <p className="text-sm text-gray-600">New shop added: Phở Hà Nội</p>
-                  <span className="text-xs text-gray-400">4 hours ago</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <p className="text-sm text-gray-600">New review posted</p>
-                  <span className="text-xs text-gray-400">6 hours ago</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <p className="text-sm text-gray-600">Blog post published</p>
-                  <span className="text-xs text-gray-400">1 day ago</span>
+              {/* Recent Activity */}
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <p className="text-sm text-gray-600">New user registered: john_doe</p>
+                    <span className="text-xs text-gray-400">2 hours ago</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <p className="text-sm text-gray-600">New shop added: Phở Hà Nội</p>
+                    <span className="text-xs text-gray-400">4 hours ago</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    <p className="text-sm text-gray-600">New review posted</p>
+                    <span className="text-xs text-gray-400">6 hours ago</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <p className="text-sm text-gray-600">Blog post published</p>
+                    <span className="text-xs text-gray-400">1 day ago</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
     </div>
   );
 }

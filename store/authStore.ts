@@ -8,6 +8,8 @@ export interface User {
   avatar?: string;
   /** JWT or session token; stored only client-side for API requests */
   token?: string;
+  /** Refresh token for /auth/refresh-token and /auth/logout */
+  refreshToken?: string;
 }
 
 interface AuthState {

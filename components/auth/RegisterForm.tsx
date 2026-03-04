@@ -14,11 +14,13 @@ export default function RegisterForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
@@ -34,15 +36,14 @@ export default function RegisterForm() {
         return;
       }
 
-      const res = await apiRegister({ name: name.trim(), email: email.trim(), password });
-      const user = {
-        ...res.user,
-        token: res.accessToken,
-      };
-      login(user);
+      // Backend expects: { email, password, fullName, phone? }
+      const res = await apiRegister({
+        email: email.trim(),
+        password,
+        fullName: name.trim(),
+      });
 
-      router.push('/');
-      router.refresh();
+      setSuccess(res.message || 'Verification email sent. Please check your email.');
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'response' in err
@@ -61,6 +62,12 @@ export default function RegisterForm() {
       {error && (
         <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
           {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
+          {success}
         </div>
       )}
 

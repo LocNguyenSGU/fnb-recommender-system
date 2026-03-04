@@ -35,18 +35,32 @@ export default function LoginForm({ onSuccess, onSignUpClick }: LoginFormProps) 
       }
 
       const res = await apiLogin({ email: email.trim(), password });
+      const rawUser = res.user as unknown as { fullName?: string; name?: string; role?: string };
+      const nameFromApi = rawUser.fullName || rawUser.name;
       const user = {
         ...res.user,
+        name: nameFromApi || email.trim(),
         token: res.accessToken,
+        refreshToken: res.refreshToken,
       };
       login(user);
 
+      // Compat với các API admin dùng lib/apiClient.js (đọc token từ localStorage)
+      if (typeof window !== 'undefined') {
+        try {
+          window.localStorage.setItem('token', res.accessToken);
+        } catch {
+          // ignore storage errors
+        }
+      }
+
+      const targetPath = rawUser.role === 'admin' ? '/admin' : '/';
+
       if (onSuccess) {
         onSuccess();
-      } else {
-        router.push('/');
-        router.refresh();
       }
+      router.push(targetPath);
+      router.refresh();
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'response' in err
